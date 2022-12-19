@@ -22,6 +22,9 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+
+include('deprecatedlib.php');
+
 /**
  * Returns the information if the module supports a feature
  *
@@ -30,7 +33,6 @@
  * @return mixed true if the feature is supported, null if unknown
  */
 function subcourse_supports($feature) {
-
     if (defined('FEATURE_MOD_PURPOSE')) {
         if ($feature === FEATURE_MOD_PURPOSE) {
             return MOD_PURPOSE_CONTENT;
@@ -326,37 +328,6 @@ function mod_subcourse_cm_info_view(cm_info $cm) {
     if ($html !== '') {
         $cm->set_after_link($html);
     }
-}
-
-/**
- * Obtains the automatic completion state for this subcourse.
- *
- * @param object $course Course
- * @param object $cm Course-module
- * @param int $userid User ID
- * @param bool $type Type of comparison (or/and; can be used as return value if no conditions)
- * @return bool True if completed, false if not, $type if conditions not set.
- */
-function subcourse_get_completion_state($course, $cm, $userid, $type) {
-    global $CFG, $DB;
-    require_once($CFG->dirroot.'/completion/completion_completion.php');
-
-    $subcourse = $DB->get_record('subcourse', ['id' => $cm->instance], 'id,refcourse,completioncourse', MUST_EXIST);
-
-    if (empty($subcourse->completioncourse)) {
-        // The rule not enabled, return early.
-        return $type;
-    }
-
-    if (empty($subcourse->refcourse)) {
-        // Misconfigured subcourse instance, behave as if was not enabled.
-        return $type;
-    }
-
-    // Check if the referenced course is completed.
-    $coursecompletion = new completion_completion(['userid' => $userid, 'course' => $subcourse->refcourse]);
-
-    return $coursecompletion->is_complete();
 }
 
 /**
