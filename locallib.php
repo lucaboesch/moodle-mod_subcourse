@@ -47,7 +47,11 @@ function subcourse_available_courses($userid = null) {
     }
 
     $fields = 'fullname,shortname,idnumber,category,visible,sortorder';
-    $mycourses = get_user_capability_course('moodle/grade:viewall', $userid, true, $fields, 'sortorder');
+
+    $mycourses = \core_course_category::search_courses(
+        ['limittoenrolled' => get_config('mod_subcourse', 'limittoenrolled')],
+        ['moodle/grade:viewall']
+    );
 
     if ($mycourses) {
         $ignorecourses = [$COURSE->id, SITEID];
