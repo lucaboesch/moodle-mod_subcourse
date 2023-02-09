@@ -19,7 +19,6 @@ Feature: Completing the referenced course can lead to completing the subcourse a
       | student1      | M         | student           |
       | teacher1      | R         | editingteacher    |
       | student1      | R         | student           |
-    And I enable "selfcompletion" "block" plugin
     # Create the subcourse instance.
     When I am on the "MainCourse" course page logged in as "teacher1"
     And I turn editing mode on
@@ -33,7 +32,6 @@ Feature: Completing the referenced course can lead to completing the subcourse a
       | id_completionexpected_enabled     | 1                                                 |
     # Add the block to a the referenced course to allow students to manually complete it
     And I am on "RefCourse" course homepage with editing mode on
-    And I add the "Self completion" block
     And I navigate to "Course completion" in current page administration
     And I expand all fieldsets
     And I set the following fields to these values:
@@ -47,8 +45,32 @@ Feature: Completing the referenced course can lead to completing the subcourse a
     Then I should see "Unit course 1 should be completed"
 
   @javascript
-  Scenario: Completing the referenced course leads to completing the subcourse
-    Given I am on the "RefCourse" course page logged in as "student1"
+  Scenario: Completing the referenced course leads to completing the subcourse in Moodle ≥ 4.0
+    Given the site is running Moodle version 4.0 or higher
+    And I enable "selfcompletion" "block" plugin
+    And I am on the "RefCourse" course page logged in as "teacher1"
+    And I turn editing mode on
+    And I add the "Self completion" block
+    And I log out
+    And I am on the "RefCourse" course page logged in as "student1"
+    And I follow "Complete course"
+    And I should see "Confirm self completion"
+    And I press "Yes"
+    # Running completion task just after clicking sometimes fail, as record should be created before the task runs.
+    And I wait "1" seconds
+    When I run the scheduled task "core\task\completion_regular_task"
+    And I am on "MainCourse" course homepage
+    Then the "Complete the activity" completion condition of "Unit course 1" is displayed as "done"
+    And I log out
+    And I log in as "teacher1"
+    And I am on "MainCourse" course homepage
+    And I navigate to "Reports > Activity completion" in current page administration
+    And "//img[contains(@title, 'Unit course 1') and contains(@title, 'Completed')]" "xpath_element" should exist in the "Student 1" "table_row"
+
+  @javascript
+  Scenario: Completing the referenced course leads to completing the subcourse in Moodle ≤ 3.11
+    Given the site is running Moodle version 3.11 or lower
+    And I am on the "RefCourse" course page logged in as "student1"
     And I follow "Complete course"
     And I should see "Confirm self completion"
     And I press "Yes"
