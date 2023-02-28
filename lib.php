@@ -23,7 +23,7 @@
  */
 
 
-include('deprecatedlib.php');
+include_once('deprecatedlib.php');
 
 /**
  * Returns the information if the module supports a feature
