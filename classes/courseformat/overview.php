@@ -47,7 +47,7 @@ class overview extends \core_courseformat\activityoverviewbase {
     #[\Override]
     public function get_actions_overview(): ?overviewitem {
         $url = new url(
-            '/mod/verbalfeedback/view.php',
+            '/mod/subcourse/view.php',
             ['id' => $this->cm->id],
         );
 
